@@ -1,0 +1,9 @@
+// I dont know how ts works, is this right?
+{
+    "compilerOptions": {
+        "lib": [
+            "ES2015",
+            "DOM"
+        ]
+    }
+}
