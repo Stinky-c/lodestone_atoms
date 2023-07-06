@@ -111,17 +111,14 @@ export abstract class ImplInstance extends Atom.AtomInstance {
     *
     * @returns The expected type
     *
-    * 
+    *
     */
     public identity<Type>(config: SetupValue, k1: string, k2: string, expected: LodestoneTypes): Type {
-
-
         let option = config.setting_sections[k1].settings[k2].value;
 
         if (option?.type != expected) {
             throw new Error("Unexpected Type")
         }
-
 
         // @ts-ignore
         return option.value;
@@ -131,6 +128,7 @@ export abstract class ImplInstance extends Atom.AtomInstance {
     public async saveConfig<Type>(config: Type, path: string) {
         await Deno.writeTextFile(path, JSON.stringify(config))
     }
+
     public async readConfig(path: string) {
         return JSON.parse(await Deno.readTextFile(path))
     }

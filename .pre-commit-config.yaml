@@ -1,0 +1,14 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+# disabled until console fix is added
+  # - repo: https://github.com/nozaq/pre-commit-deno
+    # rev: 0.1.0
+    # hooks:
+      # - id: deno-fmt
+      # - id: deno-lint

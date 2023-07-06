@@ -23,3 +23,8 @@ And more!
 #### How to use
 
 Paste this link [`https://git.buckydev.com/Bucky/lodestone_atoms/raw/branch/main/project_zomboid.ts`](https://git.buckydev.com/Bucky/lodestone_atoms/raw/branch/main/project_zomboid.ts) into the create instance atom field.
+
+## Contributing
+
+1. Ensure [pre-commit](https://pre-commit.com/) is installed into a python environment.
+2. Install pre-commit hooks using `pre-commit install`
