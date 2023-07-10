@@ -5,26 +5,28 @@
 ---
 
 A collection of atoms for use in [Lodestone](https://github.com/Lodestone-Team/lodestone_core). This repo also contains some basic classes and utils. These are working prototypes, and are not intended for real world use.
+Version pinning may be available in the future.
 
 ## Available Atoms
 
+Currently only one atom is available, but soon more is to be included.
+
+- [Project Zomboid](#project-zomboid)
+
 ### Project Zomboid
 
-An atom to bootstrap a basic dedicated project zomboid server to play and have fun on
+An atom to bootstrap a basic dedicated Project Zomboid server to quickly install, and launch a server
 
 #### TODO
 
-Console readout
-Custom settings
-INI configuration
-Polish
-And more!
+- Console readout - WIP
+- Custom settings
+- INI configuration - WIP
+- Polish
+- Find a workaround for admin user creation
+- And more!
 
 #### How to use
 
-Paste this link [`https://git.buckydev.com/Bucky/lodestone_atoms/raw/branch/main/project_zomboid.ts`](https://git.buckydev.com/Bucky/lodestone_atoms/raw/branch/main/project_zomboid.ts) into the create instance atom field.
-
-## Contributing
-
-1. Ensure [pre-commit](https://pre-commit.com/) is installed into a python environment.
-2. Install pre-commit hooks using `pre-commit install`
+Paste this link
+[`https://git.buckydev.com/Bucky/lodestone_atoms/raw/branch/main/project_zomboid.ts`](https://git.buckydev.com/Bucky/lodestone_atoms/raw/branch/main/project_zomboid.ts) into the create instance atom field.

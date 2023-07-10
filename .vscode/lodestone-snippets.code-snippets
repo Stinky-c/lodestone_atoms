@@ -1,0 +1,36 @@
+{
+    "LodestoneBoolConfig": {
+        "scope": "typescript",
+        "prefix": "LodestoneBoolConfig",
+        "body": [
+            "\"$1\":{",
+            "\tsetting_id:\"$1\",",
+            "\tname: \"$2\",",
+            "\tdescription:\"$3\",",
+            "\tvalue:null,",
+            "\tvalue_type:{type:\"Boolean\"},",
+            "\tdefault_value:{type:\"Boolean\",value:${4|true,false|}},",
+            "\tis_mutable:${5|true,false|},",
+            "\tis_required:${6|true,false|},",
+            "\tis_secret:${7|true,false|}",
+            "},$0",
+        ]
+    },
+    "LodestoneUnsigedIntConfig": {
+        "scope": "typescript",
+        "prefix": "LodestoneIntegerConfig",
+        "body": [
+            "\"$1\":{",
+            "\tsetting_id:\"$1\",",
+            "\tname: \"$2\",",
+            "\tdescription:\"$3\",",
+            "\tvalue:null,",
+            "\tvalue_type:{type:\"Integer\",min:null,max:null},",
+            "\tdefault_value:{type:\"Integer\",value:${4:0}},",
+            "\tis_mutable:${5|true,false|},",
+            "\tis_required:${6|true,false|},",
+            "\tis_secret:${7|false,true|}",
+            "},$0",
+        ]
+    }
+}

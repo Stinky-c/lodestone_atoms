@@ -1,7 +1,8 @@
 {
   "deno.enable": true,
+  "deno.lint": true,
+  "editor.defaultFormatter": "vscode.typescript-language-features",
   "deno.suggest.imports.hosts": {
-    "https://deno.land": true,
+    "https://deno.land": true
   },
-  "deno.lint": false
 }

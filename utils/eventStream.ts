@@ -8,18 +8,19 @@ export class ConsoleEventStream extends WritableStream {
   public constructor(eventStream: EventStream) {
     super(
       {
-        async write(c: Uint8Array, _c2) {
+        async write(
+          c: Uint8Array,
+          _controller: WritableStreamDefaultController,
+        ) {
           await eventStream.emitConsoleOut(_textDecoder.decode(c));
         },
-        async start(_c2) {
-          return Promise.resolve();
-        },
-        close() {
-          console.log("");
-          return Promise.resolve();
-        },
+
+        async start(_controller: WritableStreamDefaultController) {},
+
+        close() {},
+
         abort(reason?: any) {
-          Promise.resolve();
+          throw new Error("`Abort` not implemented.");
         },
       },
     );

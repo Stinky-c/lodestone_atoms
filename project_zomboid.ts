@@ -5,21 +5,16 @@ import { EventStream } from "https://raw.githubusercontent.com/Lodestone-Team/lo
 import { ImplInstance } from "./utils/default.ts";
 import { LodestoneInstanceState, LodestoneTypes } from "./utils/types.ts";
 import { ConsoleEventStream } from "./utils/eventStream.ts";
-import { ProjectZomboidConfig } from "./configs/projectZomboid.ts";
+import { ProjectZomboidConfig,ProjectZomboidManifest } from "./configs/projectZomboid.ts";
 
 export default class ProjectZomboidInstance extends ImplInstance {
   uuid!: string;
   _state: LodestoneInstanceState = LodestoneInstanceState.Stopped;
   path!: string;
-  event_stream!: EventStream;
   console_stream!: ConsoleEventStream;
   config!: ProjectZomboidConfig;
-  _console_handlers: {
-    _consoleWriter?: WritableStreamDefaultWriter<Uint8Array>;
-    _consoleReader?: ReadableStreamDefaultReader<Uint8Array>;
-    _textEncoder: TextEncoder;
-    _textDecoder: TextDecoder;
-  } = { _textEncoder: new TextEncoder(), _textDecoder: new TextDecoder() };
+  _consoleWriter?: WritableStreamDefaultWriter<Uint8Array>;
+  _textEncoder: TextEncoder = new TextEncoder();
 
   // static
   static restoreConfigName = "restore.json";
@@ -29,48 +24,17 @@ export default class ProjectZomboidInstance extends ImplInstance {
   // TODO: project zomboid ini configurations
 
   public async setupManifest(): Promise<Atom.SetupManifest> {
-    return {
-      setting_sections: {
-        "game_conf": {
-          section_id: "game_conf",
-          name: "Game Config",
-          description: "Basic Server Configuration",
-          settings: {
-            "port_1": {
-              setting_id: "port_1",
-              name: "Port 1",
-              description: "Game port",
-              value: null,
-              value_type: { type: "UnsignedInteger", min: 0, max: 65535 },
-              default_value: { type: "UnsignedInteger", value: 16261 },
-              is_secret: false,
-              is_required: true,
-              is_mutable: true,
-            },
-            "port_2": {
-              setting_id: "port_2",
-              name: "Port 2",
-              description: "Direct Connect port",
-              value: null,
-              value_type: { type: "UnsignedInteger", min: 0, max: 65535 },
-              default_value: { type: "UnsignedInteger", value: 16262 },
-              is_secret: false,
-              is_required: true,
-              is_mutable: true,
-            },
-          },
-        },
-      },
-    };
+    return {setting_sections:ProjectZomboidManifest};
   }
 
   public async configurableManifest(): Promise<Atom.ConfigurableManifest> {
     return {
       auto_start: false,
       restart_on_crash: false,
-      setting_sections: {},
+      setting_sections: ProjectZomboidManifest,
     };
   }
+
   public async setup(
     setupValue: Atom.SetupValue,
     dotLodestoneConfig: Atom.DotLodestoneConfig,
@@ -79,13 +43,13 @@ export default class ProjectZomboidInstance extends ImplInstance {
     console.log("Started Setup");
 
     this.uuid = dotLodestoneConfig.uuid;
-    let port_1: number = this.identity(
+    const port_1: number = this.identity(
       setupValue,
       "game_conf",
       "port_1",
       LodestoneTypes.UnsignedInteger,
     );
-    let port_2: number = this.identity(
+    const port_2: number = this.identity(
       setupValue,
       "game_conf",
       "port_2",
@@ -115,8 +79,9 @@ export default class ProjectZomboidInstance extends ImplInstance {
     this.event_stream = new EventStream(this.uuid, this.config.name);
     this.console_stream = new ConsoleEventStream(this.event_stream);
 
-    // Install process
-    await this._Install(ProjectZomboidInstance.steamAppId.toString(), path); // Add to a task?
+    // Install game files
+    await this._Install(ProjectZomboidInstance.steamAppId.toString(), path); // wait for ProgressionEvent to be implemented
+    // https://discord.com/channels/1061833018496532531/1061833019138256989/1126703169464959076
 
     console.log("Install complete!");
     return;
@@ -130,17 +95,16 @@ export default class ProjectZomboidInstance extends ImplInstance {
     this.config = await this.readConfig(
       `${path}/${ProjectZomboidInstance.restoreConfigName}`,
     ) as ProjectZomboidConfig;
+
     this.event_stream = new EventStream(this.uuid, this.config.name);
     this.console_stream = new ConsoleEventStream(this.event_stream);
 
     return;
   }
-
+  // TODO: use the system for long running processes
   public async start(caused_by: Atom.CausedBy, block: boolean): Promise<void> {
     // State updates
-    console.log("start");
-    this.event_stream.emitStateChange(LodestoneInstanceState.Running);
-    this._state = LodestoneInstanceState.Running;
+    await this.updateState(LodestoneInstanceState.Starting);
 
     // process start and stdout, stderr, and stdin handling
     const cmd = new Deno.Command(`${this.config.path}/start-server.sh`, {
@@ -148,28 +112,29 @@ export default class ProjectZomboidInstance extends ImplInstance {
       stderr: "piped",
       stdout: "piped",
     }).spawn();
+    cmd.ref(); // TODO: find a way to ensure process dies when lodestone closes
 
-    this._console_handlers._consoleWriter = cmd.stdin.getWriter();
-    /*
-    mergeReadableStreams(cmd.stdout, cmd.stderr).pipeTo(this.console_stream, {
-      preventAbort: true,
-      preventCancel: true,
-    });
-    */
-    mergeReadableStreams(cmd.stdout, cmd.stderr).pipeTo(Deno.stdout.writable, {
-      preventAbort: true,
-      preventCancel: true,
-    });
 
-    console.log("Startup complete!");
+    this._consoleWriter = cmd.stdin.getWriter();
+
+    mergeReadableStreams(cmd.stdout, cmd.stderr).pipeTo(
+      this.console_stream,
+      {preventAbort:true},
+    );
+
+    // await EventStream.emitDetach();
+    // await this.updateState(LodestoneInstanceState.Running);
+
+    console.log("Startup complete");
     return;
+    // Functions randomly stops
+    // console.log is called but process still dies?
   }
 
   public async stop(caused_by: Atom.CausedBy, block: boolean): Promise<void> {
     console.log("stop", caused_by);
-    this._state = LodestoneInstanceState.Stopped;
+    this.updateState(LodestoneInstanceState.Stopping);
     this.writeConsole("quit");
-    this.event_stream.emitStateChange(LodestoneInstanceState.Running);
     return;
   }
 
@@ -189,8 +154,8 @@ export default class ProjectZomboidInstance extends ImplInstance {
     command: string,
     caused_by: Atom.CausedBy,
   ): Promise<void> {
-    const message = this._console_handlers._textEncoder.encode(command);
-    this._console_handlers._consoleWriter?.write(message);
+    const message = this._textEncoder.encode(command);
+    this._consoleWriter?.write(message);
     this.event_stream.emitConsoleOut(`Got command: ${command}`);
     console.log(`Got command: ${command}`);
   }
@@ -282,7 +247,7 @@ export default class ProjectZomboidInstance extends ImplInstance {
     const installGame = new Deno.Command("steamcmd", {
       args: [
         `+force_install_dir ${path + "/"}`,
-        "+login anonymous ",
+        "+login anonymous",
         `+app_update ${steamAppId} validate`,
         "+quit",
       ],
@@ -300,17 +265,14 @@ export default class ProjectZomboidInstance extends ImplInstance {
 
   //#region - Console handlers
   private checkConsole() {
-    if (this._console_handlers._consoleReader == undefined) {
-      throw new Error("Missing consoleReader");
-    }
-    if (this._console_handlers._consoleWriter === undefined) {
+    if (this._consoleWriter === undefined) {
       throw new Error("Missing consoleWriter");
     }
   }
   private writeConsole(text: string) {
     this.checkConsole();
-    this._console_handlers._consoleWriter?.write(
-      this._console_handlers._textEncoder.encode(text),
+    this._consoleWriter?.write(
+      this._textEncoder.encode(text),
     );
   }
 }

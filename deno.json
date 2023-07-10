@@ -1,17 +1,25 @@
 {
-    "_comment": "PEP 8 is makes things look nice, but i dont know how i feel about 2 space indents",
-    "fmt": {
-        "useTabs": false,
-        "lineWidth": 80,
-        "indentWidth": 2,
-        "semiColons": true,
-        "singleQuote": false,
-        "include": [
-            "src/"
-        ],
-        "exclude": [
-            "src/testdata/",
-            "data/fixtures/**/*.ts"
-        ]
+  "_comment": "PEP 8 is makes things look nice, but i dont know how i feel about 2 space indents",
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 80,
+    "indentWidth": 2,
+    "semiColons": true,
+    "singleQuote": false,
+    "include": [
+      "src/"
+    ],
+    "exclude": [
+      "src/testdata/",
+      "data/fixtures/**/*.ts"
+    ]
+  },
+  "lint": {
+    "files": { "exclude": ["**/*.md"]},
+    "rules": {
+      "exclude": [
+        "require-await"
+      ]
     }
+  }
 }
